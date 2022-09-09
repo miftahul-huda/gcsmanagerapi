@@ -31,16 +31,20 @@ app.use(function(req, res, next) {
 });
 
 //Consider all request as application/json
-app.use(express.json({type: '*/*'}));
+//app.use(express.json({type: '*/*'}));
 // parse application/json
-app.use(bodyParser.json())
+//app.use(bodyParser.json())
+
+//app.use(express.json({limit: '50mb', type: '*/*'}));
+//app.use(bodyParser.json({ limit: "200mb" }));
+//app.use(bodyParser.urlencoded({ limit: "200mb",  extended: true, parameterLimit: 1000000 }));
 
 app.use(session({
   store: new DatastoreStore({
     dataset: new Datastore(),
     kind: 'express-sessions',
   }),
-  secret: 'levenshtein',saveUninitialized: true,resave: false}));
+  secret: 'gcsmanagerapi',saveUninitialized: true,resave: false}));
 
 //Dynamic routing based on configuration
 const fs = require('fs');

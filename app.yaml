@@ -1,14 +1,14 @@
-service: <appid>
-runtime: nodejs12
+service: gcsmanagerapi
+runtime: nodejs16
 env: standard
 env_variables:
-  DBHOST: "<dbhost>"
-  DBNAME: "<dbname>"
-  DBUSER: "<dbuser>"
-  DBPASSWORD: "<dbpassword>"
+  DBHOST: "34.67.143.103"
+  DBNAME: "gcsmanagerapi"
+  DBUSER: "nodeuser"
+  DBPASSWORD: "RotiKeju98*"
   DBENGINE: "postgresql"
-  APPLICATION_NAME : "<appname>"
-  APPLICATION_TITLE : "<apptitle>"
+  APPLICATION_NAME : "gcsmanagerapi"
+  APPLICATION_TITLE : "GCS Manager API"
   APPLICATION_PORT : "8080"
-  PROJECT : "<project>"
+  PROJECT : "huda-playground"
 

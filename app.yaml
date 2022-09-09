@@ -1,0 +1,14 @@
+service: <appid>
+runtime: nodejs12
+env: standard
+env_variables:
+  DBHOST: "<dbhost>"
+  DBNAME: "<dbname>"
+  DBUSER: "<dbuser>"
+  DBPASSWORD: "<dbpassword>"
+  DBENGINE: "postgresql"
+  APPLICATION_NAME : "<appname>"
+  APPLICATION_TITLE : "<apptitle>"
+  APPLICATION_PORT : "8080"
+  PROJECT : "<project>"
+

@@ -1,0 +1,190 @@
+div
+{
+  font-family: 'Roboto', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+a {
+  color: #515e81;
+}
+
+.card-body
+{
+  padding: 2%;
+}
+
+.btn-primary {
+  background-color: #515e81;
+  border: 0px solid;
+}
+
+.btn-primary-2 {
+  background-color: #e8eef0;
+  border: 0px solid;
+}
+
+.btn-primary:hover {
+  background-color: #515e81;
+  border: 0px solid;
+}
+
+.btn-primary:not( :hover ) {
+  background-color: #515e81;
+  border: 0px solid;
+}
+
+.btn-primary:active {
+  background-color: #515e81;
+  border: 0px solid;
+}
+
+
+.select2-container--default .select2-results__option--highlighted[aria-selected], .select2-container--default .select2-results__option--highlighted[aria-selected]:hover {
+  background-color: #F2F2F2;
+  color: #fff;
+}
+
+.btn{
+  border-radius: 0%;
+  display: table;
+  height: 35px;
+  background-color: #6C757D;
+  color: #fff;
+  display: table;
+}
+
+.btn-navigation
+{
+  background-color: #3f2de0cb;
+  border: 0px solid;
+  width: 100%;
+}
+
+
+#tbl-result
+{
+  width: 80%;
+  border: solid 1px #ccc;
+  margin-left: 10%;
+}
+
+#tbl-result td, th
+{
+  padding: 10px;
+}
+
+#processgif
+{
+  position: absolute;
+  top: 30%;
+  left: 40%;
+  width: 400px;
+  height: 200px;
+  background-image: url(../images/process.gif);
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected], .select2-container--default .select2-results__option--highlighted[aria-selected]:hover {
+  background-color: #F2F2F2;
+  color: #000;
+}
+
+.btn-icon
+{
+  min-width: 20px;
+  width: auto;
+  height: 100%;
+  
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+  display: table-cell;
+  
+}
+.btn-icon > div
+{
+
+}
+
+.btn-container
+{
+  display: table-cell;
+  vertical-align: top;
+}
+
+.btn-icon-2
+{
+  width: 20px;
+  height: 20px;
+  
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+  display: table-cell;
+}
+
+.btn-text
+{
+  display: table-cell;
+  min-width: 100px;
+  text-align: left;
+  padding-left: 6px;
+  font-size: 10pt;
+}
+
+.btn-text-2
+{
+  display: table-cell;
+  width: 0;
+  text-align: left;
+  padding-left: 0px;
+}
+
+.icon-gear
+{
+  background-image: url(../images/gear.png);
+}
+
+.icon-next
+{
+  background-image: url(../images/next.png);
+}
+
+.icon-home
+{
+  background-image: url(../images/home.png);
+}
+
+.icon-form
+{
+  background-image: url(../images/form.png);
+}
+
+.icon-table
+{
+  background-image: url(../images/table.png);
+}
+
+.icon-manual
+{
+  background-image: url(../images/manual.png);
+}
+
+.icon-clear
+{
+  background-image: url(../images/clear.png);
+}
+
+.icon-save
+{
+  background-image: url(../images/save.png);
+}
+
+.icon-ocr
+{
+  background-image: url(../images/ocr.png);
+}
+
+.icon-previous
+{
+  background-image: url(../images/previous.png);
+}
+

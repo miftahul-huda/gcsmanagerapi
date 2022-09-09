@@ -1,0 +1,4 @@
+[
+    { "path" :  "", "router"  : "./routes/web" },
+    { "path" :  "/sample", "router"  : "./routes/sample", "logic" : "./modules/logic/sample_logic" }
+]

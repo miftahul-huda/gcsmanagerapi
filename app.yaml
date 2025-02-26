@@ -2,10 +2,10 @@ service: gcsmanagerapi
 runtime: nodejs20
 env: standard
 env_variables:
-  DBHOST: "34.101.73.230"
+  DBHOST: ""
   DBNAME: "gcsmanagerapi"
-  DBUSER: "nodeuser"
-  DBPASSWORD: "RotiKeju98*"
+  DBUSER: ""
+  DBPASSWORD: ""
   DBENGINE: "postgresql"
   APPLICATION_NAME : "gcsmanagerapi"
   APPLICATION_TITLE : "GCS Manager API"

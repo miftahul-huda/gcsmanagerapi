@@ -8,6 +8,8 @@ var bodyParser = require('body-parser')
 const session = require('express-session');
 const {Datastore} = require('@google-cloud/datastore');
 const {DatastoreStore} = require('@google-cloud/connect-datastore');
+const cors = require('cors');
+
 
 var Initialization = require("./initialization")
 
@@ -23,13 +25,15 @@ ejs.close = '}}';
 
 
 var app = express();
+app.use(cors())
+app.options('*', cors());
 
-app.use(function(req, res, next) {
+/*app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
-
+*/
 //Consider all request as application/json
 //app.use(express.json({type: '*/*'}));
 // parse application/json

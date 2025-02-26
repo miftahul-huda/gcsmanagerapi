@@ -1,8 +1,8 @@
 service: gcsmanagerapi
-runtime: nodejs16
+runtime: nodejs20
 env: standard
 env_variables:
-  DBHOST: "34.67.143.103"
+  DBHOST: "34.101.73.230"
   DBNAME: "gcsmanagerapi"
   DBUSER: "nodeuser"
   DBPASSWORD: "RotiKeju98*"
@@ -10,5 +10,5 @@ env_variables:
   APPLICATION_NAME : "gcsmanagerapi"
   APPLICATION_TITLE : "GCS Manager API"
   APPLICATION_PORT : "8080"
-  PROJECT : "huda-playground"
+  PROJECT : "lv-saas"
 

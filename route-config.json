@@ -1,9 +1,9 @@
 [
     { "path" :  "", "router"  : "./routes/web" },
     { "path" :  "/sample", "router"  : "./routes/sample", "logic" : "./modules/logic/sample_logic" },
-    { "path" :  "/api/v2/histories", "router"  : "./routes/histories", "logic" : "./modules/logic/historylogic" },
-    { "path" :  "/api/v2/configurations", "router"  : "./routes/configurations", "logic" : "./modules/logic/configurationlogic" },
-    { "path" :  "/api/v2/apikeys", "router"  : "./routes/apikeys", "logic" : "./modules/logic/apikeylogic" },
-    { "path" :  "/api/v2/gcs", "router"  : "./routes/gcs", "logic" : "./modules/logic/gcslogic" }
+    { "path" :  "/histories", "router"  : "./routes/histories", "logic" : "./modules/logic/historylogic" },
+    { "path" :  "/configurations", "router"  : "./routes/configurations", "logic" : "./modules/logic/configurationlogic" },
+    { "path" :  "/apikeys", "router"  : "./routes/apikeys", "logic" : "./modules/logic/apikeylogic" },
+    { "path" :  "/gcs", "router"  : "./routes/gcs", "logic" : "./modules/logic/gcslogic" }
 
 ]

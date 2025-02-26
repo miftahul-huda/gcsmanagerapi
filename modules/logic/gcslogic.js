@@ -40,7 +40,7 @@ class GCSLogic  {
                         GCS.upload(filenameInfo.bucket, filenameInfo.temporaryFile, filenameInfo.outputFilename ).then((response)=>{
                             resolve(response)
                         }).catch((e)=>{
-                            reject({code: 'app.702', source:"GCSLogic.uploadFile", message: "Upload failed", error: e});
+                            reject({code: 'app.702', source:"GCSLogic.uploadFile", message: "Upload failed", error: e, data: filenameInfo});
                         })
                     }
                     else
@@ -335,9 +335,11 @@ class GCSLogic  {
     {
         //Get bucket from targetPath
         let bucket = targetPath.split("/")
-        //console.log("bucket")
-        //console.log(bucket)
-        bucket = bucket[1]
+        console.log("bucket")
+        console.log(bucket)
+        bucket = bucket[0]
+        console.log("bucket")
+        console.log(bucket)
 
 
         //Get uploaded filename and its extension

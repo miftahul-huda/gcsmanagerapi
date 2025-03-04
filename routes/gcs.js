@@ -19,6 +19,12 @@ class GCSRouter {
             //Get path parameter
             let path = req.query.path;
             let targetFilename = req.query.target;
+            let targetProject = req.query.project;
+
+            //console.log("target Project")
+            //console.log(targetProject)
+
+
 
             //If path parameter is not provided, return false
             if(path == null || path.length == 0)
@@ -28,7 +34,7 @@ class GCSRouter {
             else 
             {
                 //Else upload file to GCS
-                logic.uploadFile(req, path, targetFilename).then((response)=>{
+                logic.uploadFile(req, path, targetFilename, targetProject).then((response)=>{
                     res.send({ success: true, payload: response})
                 }).catch((err)=>{
                     res.send({ success: false, error: err })

@@ -12,8 +12,9 @@ const { base64encode, base64decode } = require('nodejs-base64');
 class GCSLogic  {
 
     //Public Function : uploadFile
-    static uploadFile(req, targetPath, targetFilename )
+    static uploadFile(req, targetPath, targetFilename, targetProject )
     {
+        //console.log("uploadfile")
         let promise = new Promise((resolve, reject)=>{
 
             //Get keys from the req.files
@@ -34,12 +35,39 @@ class GCSLogic  {
                     allowedExtensions = allowedExtensions.toLowerCase();
                     allowedExtensions = allowedExtensions.split(",")
 
+                    let additionalExts = [];
+                    for(let i = 0; i < allowedExtensions.length; i++)
+                    {
+                        let tmp = allowedExtensions[i].split(";")
+                        additionalExts = additionalExts.concat(tmp)
+                    }
+
+                    allowedExtensions = allowedExtensions.concat(additionalExts)
+
+                    //console.log("allowedExtensions")
+                    //console.log(allowedExtensions)
+                    //console.log(allowedExtensions)
                     //if extension is allowed
                     if(allowedExtensions.includes(filenameInfo.ext))
                     {
-                        GCS.upload(filenameInfo.bucket, filenameInfo.temporaryFile, filenameInfo.outputFilename ).then((response)=>{
+
+                        let targetProjectInfo = null;
+                        if(targetProject != null)
+                        {
+                            targetProjectInfo = {};
+                            targetProjectInfo.projectId = targetProject;
+                            const decodedString = Buffer.from(process.env.GCS_PROJECT_CREDENTIAL, 'base64').toString('utf-8');
+                            targetProjectInfo.credential = JSON.parse(decodedString);
+                        }
+
+                        //console.log("targetProjectInfo")
+                        //console.log(targetProjectInfo)
+
+                        GCS.upload(filenameInfo.bucket, filenameInfo.temporaryFile, filenameInfo.outputFilename, targetProjectInfo ).then((response)=>{
                             resolve(response)
                         }).catch((e)=>{
+                            console.log("error")
+                            console.log(e)
                             reject({code: 'app.702', source:"GCSLogic.uploadFile", message: "Upload failed", error: e, data: filenameInfo});
                         })
                     }
@@ -103,8 +131,8 @@ class GCSLogic  {
             
             
             let fileInfo = GCSLogic.getFileInfos(gcsPath, targetFilename)
-            console.log("zipAndDownload")
-            console.log(fileInfo)
+            //console.log("zipAndDownload")
+            //console.log(fileInfo)
 
             let tmpFolder = "/tmp/zip_" + Utils.randomString(10);
             fs.mkdirSync(tmpFolder)
@@ -256,7 +284,7 @@ class GCSLogic  {
             bucket = bucket[1]
             GCS.listFiles(gcsPath).then((files)=>{
 
-                console.log(files)
+                //console.log(files)
 
                 GCSLogic.totalFiles = files.length;
                 GCSLogic.counter = 0;
@@ -289,8 +317,8 @@ class GCSLogic  {
         let promise = new Promise((resolve, reject)=>{
             ZIP.zipDirectory(folderToZip, outputFilename).then((result)=>{
 
-                console.log("zipFiles")
-                console.log(result)
+                //console.log("zipFiles")
+                //console.log(result)
                 resolve(result)
     
             }).catch((e)=>{
@@ -333,13 +361,17 @@ class GCSLogic  {
 
     static getFilenames(req, key, targetPath, targetFilename)
     {
+        if(targetPath.substr(0, 1) == "/")
+            targetPath = targetPath.substr(1, targetPath.length - 1)
+
+        if(targetPath.substr(targetPath.length - 1, 1) == "/")
+            targetPath = targetPath.substr(0, targetPath.length - 1)
+
+
         //Get bucket from targetPath
         let bucket = targetPath.split("/")
-        console.log("bucket")
-        console.log(bucket)
+        
         bucket = bucket[0]
-        console.log("bucket")
-        console.log(bucket)
 
 
         //Get uploaded filename and its extension
@@ -356,7 +388,7 @@ class GCSLogic  {
             outputFilename = targetFilename;
 
         //set path  of the output filename
-        let gcsFolder = targetPath.replace("/" + bucket, "");            
+        let gcsFolder = targetPath.replace( bucket, "");         
         outputFilename = gcsFolder + '/' + outputFilename;
 
 

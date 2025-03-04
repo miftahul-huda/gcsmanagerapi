@@ -4,15 +4,30 @@ var path = require('path');
 class GCS  {
 
     //Upload file to Google cloud storage
-    static upload(bucketName, inputFile, targetFilename)
+    static upload(bucketName, inputFile, targetFilename, targetProjectInfo)
     {
         let promise = new Promise((resolve, reject)=>{
             //Create storage client
-            const storage = new Storage();
+            let storage = null;
+
+
+            if(targetProjectInfo == null)
+                storage = new Storage();
+            else 
+            {
+
+                const credential = targetProjectInfo.credential;
+                const projectId = targetProjectInfo.projectId;
+                storage = new Storage({ projectId: projectId, credentials: credential })
+
+            }
 
 
             if(targetFilename.substr(0, 1) == "/")
                 targetFilename = targetFilename.substr(1);
+
+            //console.log("targetFilename")
+            //console.log(targetFilename)
 
             //Create options
             let options = 
@@ -48,8 +63,8 @@ class GCS  {
 
     static downloadFile(bucketName, filePath, outputFilename)
     {
-        console.log("downloadFile")
-        console.log(bucketName + ", " + filePath + ", " + outputFilename)
+        //console.log("downloadFile")
+        //console.log(bucketName + ", " + filePath + ", " + outputFilename)
         let promise = new Promise((resolve, reject)=>{
 
             // Creates a client

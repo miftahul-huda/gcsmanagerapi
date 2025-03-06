@@ -105,6 +105,10 @@ InitApp.loadEnvironmentVariables().then(()=>{
   app.listen(port)
   var Initialization = require("./initialization")
   Initialization.initializeDatabase();
+  console.log(process.env.DBHOST)
+  console.log(process.env.DBNAME)
+  //console.log(process.env.GCS_PROJECT_CREDENTIAL)
+
   console.log(appTitle + " server on  port : " + port)
 })
 

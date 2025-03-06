@@ -4,9 +4,12 @@ var path = require('path');
 class GCS  {
 
     //Upload file to Google cloud storage
-    static upload(bucketName, inputFile, targetFilename, targetProjectInfo)
+    static upload(inputFile, targetFilename, targetProjectInfo)
     {
         let promise = new Promise((resolve, reject)=>{
+
+            console.log("Targetfielname")
+            console.log(targetFilename)
             //Create storage client
             let storage = null;
 
@@ -15,16 +18,25 @@ class GCS  {
                 storage = new Storage();
             else 
             {
-
                 const credential = targetProjectInfo.credential;
                 const projectId = targetProjectInfo.projectId;
                 storage = new Storage({ projectId: projectId, credentials: credential })
-
             }
 
 
-            if(targetFilename.substr(0, 1) == "/")
-                targetFilename = targetFilename.substr(1);
+            if(targetFilename.substr(targetFilename.length - 1, 1) == "/")
+            {
+                targetFilename = targetFilename.substr(0, targetFilename.length - 1)
+                targetFilename = targetFilename + "/" + path.basename(inputFile)
+            }
+
+            let fileInfo = GCS.parseInfo(targetFilename)
+
+            console.log("fileinfo 2")
+            console.log(fileInfo)
+            let bucketName = fileInfo.bucket
+            targetFilename = fileInfo.filePath
+
 
             //console.log("targetFilename")
             //console.log(targetFilename)
@@ -61,23 +73,46 @@ class GCS  {
 
     }
 
-    static downloadFile(bucketName, filePath, outputFilename)
+    static downloadFile(filePath, outputFilename, targetProjectInfo)
     {
         //console.log("downloadFile")
         //console.log(bucketName + ", " + filePath + ", " + outputFilename)
         let promise = new Promise((resolve, reject)=>{
 
-            // Creates a client
-            const storage = new Storage();
+            let fileInfo = GCS.parseInfo(filePath)
+            let bucketName = fileInfo.bucket
+
+            let storage = null;
+            if(targetProjectInfo == null)
+                storage = new Storage();
+            else 
+            {
+                const credential = targetProjectInfo.credential;
+                const projectId = targetProjectInfo.projectId;
+                storage = new Storage({ projectId: projectId, credentials: credential })
+            }
+
+            
 
             const options = {
                 destination: outputFilename,
             };
 
-            storage.bucket(bucketName).file(filePath).download(options).then((response)=>{
+            console.log("===bucketname===")
+            console.log(bucketName)
+            console.log("===filepath===")
+            console.log(fileInfo.filePath)
+            console.log("===outputFilename===")
+            console.log(outputFilename)
+
+            storage.bucket(bucketName).file(fileInfo.filePath).download(options).then((response)=>{
+                console.log("response")
+                console.log(response)
+                
                 resolve(outputFilename)
+
             }).catch((e)=>{
-                console.log("error")
+                console.log("error storage.bucket.download")
                 console.log(e)
                 reject(e)
             });
@@ -86,16 +121,36 @@ class GCS  {
         return promise;
     }
 
-    static listFiles(gcsPath)
+    static listFiles(gcsPath, targetProjectInfo)
     {
         let promise = new Promise((resolve, reject)=>{
 
-            let ff = gcsPath.split("/")
-            let bucketName = ff[1]
-            let ppath = gcsPath.replace("/" + bucketName + "/", "")
+            let fileInfo = GCS.parseInfo(gcsPath)
+            let bucketName = fileInfo.bucket
+            let ppath = fileInfo.filePath
+
+            if(ppath.substr(ppath.length - 1, 1) != "/")
+                ppath = ppath + "/"
+
+
+            console.log("bucketName")
+            console.log(bucketName)
+            console.log("ppath")
+            console.log(ppath)
+
 
             // Creates a clients
-            const storage = new Storage();
+            
+            let storage = null;
+            if(targetProjectInfo == null)
+                storage = new Storage();
+            else 
+            {
+                const credential = targetProjectInfo.credential;
+                const projectId = targetProjectInfo.projectId;
+                storage = new Storage({ projectId: projectId, credentials: credential })
+            }
+
             const options = {
                 prefix: ppath,
             };
@@ -103,8 +158,11 @@ class GCS  {
 
             storage.bucket(bucketName).getFiles(options).then(([files])=>{
                 let newFiles = []
+
                 files.map((file)=>{
-                    newFiles.push({ name: bucketName + "/" + file.name, size: file.metadata.size, contentType: file.metadata.contentType })
+                    let fname = file.name;
+                    if(fname.substr(fname.length - 1, 1) != "/")
+                        newFiles.push({ name: bucketName + "/" + file.name, size: file.metadata.size, contentType: file.metadata.contentType })
                 })
                 resolve(newFiles)
             }).catch((e)=>{
@@ -117,11 +175,20 @@ class GCS  {
         return promise;
     }
 
-    static copy(sourcePath, targetPath)
+    static copy(sourcePath, targetPath, targetProjectInfo)
     {
         let promise = new Promise((resolve, reject)=>{
+            
+            let storage = null;
+            if(targetProjectInfo == null)
+                storage = new Storage();
+            else 
+            {
+                const credential = targetProjectInfo.credential;
+                const projectId = targetProjectInfo.projectId;
+                storage = new Storage({ projectId: projectId, credentials: credential })
+            }
 
-            const storage = new Storage();  
             let info = this.parseInfo(sourcePath)
             const sourceBucket = storage.bucket(info.bucket);
             const sourceFilepath = sourceBucket.file(info.filePath);
@@ -140,11 +207,20 @@ class GCS  {
         return promise;
     }
 
-    static delete(gcsPath)
+    static delete(gcsPath, targetProjectInfo)
     {
         let promise = new Promise((resolve, reject)=>{
 
-            const storage = new Storage();  
+            let storage = null;
+            if(targetProjectInfo == null)
+                storage = new Storage();
+            else 
+            {
+                const credential = targetProjectInfo.credential;
+                const projectId = targetProjectInfo.projectId;
+                storage = new Storage({ projectId: projectId, credentials: credential })
+            }
+
             let info = this.parseInfo(gcsPath)
             const sourceBucket = storage.bucket(info.bucket);
             const sourceFilepath = sourceBucket.file(info.filePath);
@@ -161,11 +237,20 @@ class GCS  {
     }
 
 
-    static rename(sourcePath, targetPath)
+    static rename(sourcePath, targetPath, targetProjectInfo)
     {
         let promise = new Promise((resolve, reject)=>{
 
-            const storage = new Storage();  
+            let storage = null;
+            if(targetProjectInfo == null)
+                storage = new Storage();
+            else 
+            {
+                const credential = targetProjectInfo.credential;
+                const projectId = targetProjectInfo.projectId;
+                storage = new Storage({ projectId: projectId, credentials: credential })
+            }
+
             let info = this.parseInfo(sourcePath)
             const sourceBucket = storage.bucket(info.bucket);
             const sourceFilepath = sourceBucket.file(info.filePath);
@@ -187,11 +272,20 @@ class GCS  {
 
     static parseInfo(gcsPath)
     {
+        if(gcsPath.substr(0, 1) == "/")
+            gcsPath = gcsPath.substr(1, gcsPath.length - 1)
+
+        if(gcsPath.substr(gcsPath.length - 1, 1) == "/")
+        {
+            gcsPath = gcsPath.substr(0, gcsPath.length - 1)
+        }
+
+
         let bucket = gcsPath.split("/")
-        bucket = bucket[1]
+        bucket = bucket[0]
 
         let filename = path.basename(gcsPath)
-        let filePath = gcsPath.replace("/" + bucket + "/" , "")
+        let filePath = gcsPath.replace( bucket + "/" , "")
 
         return { bucket: bucket, filePath: filePath, filename: filename }
     }

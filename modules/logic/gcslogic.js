@@ -51,19 +51,16 @@ class GCSLogic  {
                     if(allowedExtensions.includes(filenameInfo.ext))
                     {
 
-                        let targetProjectInfo = null;
-                        if(targetProject != null)
-                        {
-                            targetProjectInfo = {};
-                            targetProjectInfo.projectId = targetProject;
-                            const decodedString = Buffer.from(process.env.GCS_PROJECT_CREDENTIAL, 'base64').toString('utf-8');
-                            targetProjectInfo.credential = JSON.parse(decodedString);
-                        }
+                        let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
 
-                        //console.log("targetProjectInfo")
-                        //console.log(targetProjectInfo)
+                        console.log("targetProjectInfo")
+                        console.log(targetProjectInfo)
 
-                        GCS.upload(filenameInfo.bucket, filenameInfo.temporaryFile, filenameInfo.outputFilename, targetProjectInfo ).then((response)=>{
+                        console.log("filenameInfo")
+                        console.log(filenameInfo)
+
+
+                        GCS.upload(filenameInfo.temporaryFile, filenameInfo.bucket + "" + filenameInfo.outputFilename, targetProjectInfo ).then((response)=>{
                             resolve(response)
                         }).catch((e)=>{
                             console.log("error")
@@ -87,18 +84,11 @@ class GCSLogic  {
     }
 
     //Public Function : downloadFile
-    static downloadFile(downloadPath, targetFilename )
+    static downloadFile(downloadPath, targetFilename, targetProject )
     {
+        console.log("downloadFile")
         let promise = new Promise((resolve, reject)=>{
             
-            
-            //Get bucket from downloadPath
-            let bucket = downloadPath.split("/")
-            bucket = bucket[1]
-
-            //Get path to file to download without bucket name 
-            downloadPath = downloadPath.replace("/" + bucket + "/", "")
-
             //Get output filename in  temporary file
             let outputFilename = targetFilename
             if( outputFilename != null && outputFilename.length > 0)
@@ -113,8 +103,13 @@ class GCSLogic  {
 
             let tmpFolder = "/tmp/";
             outputFilename = tmpFolder + "/" + outputFilename
+
+            console.log("downloadPath")
+            console.log(downloadPath)
+
             
-            GCS.downloadFile(bucket, downloadPath, outputFilename ).then((outfile)=>{
+            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            GCS.downloadFile(downloadPath, outputFilename, targetProjectInfo ).then((outfile)=>{
                 resolve(outfile)
             }).catch((e)=>{
                 reject({code: 'app.702', source:"GCSLogic.downloadFile", message: "Download failed", error: e})
@@ -125,7 +120,7 @@ class GCSLogic  {
 
 
     //Public Function: To zip folder and download the zip file
-    static zipAndDownload(gcsPath, targetFilename )
+    static zipAndDownload(gcsPath, targetFilename, targetProject )
     {
         let promise = new Promise((resolve, reject)=>{
             
@@ -137,11 +132,14 @@ class GCSLogic  {
             let tmpFolder = "/tmp/zip_" + Utils.randomString(10);
             fs.mkdirSync(tmpFolder)
 
+            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+
             //Download files to local folder
-            GCSLogic.downloadFiles(gcsPath, tmpFolder).then((downloadedFiles)=>{
+            
+            GCSLogic.downloadFiles(gcsPath, tmpFolder, targetProject).then((downloadedFiles)=>{
 
                 //Zip  the local folder
-                GCSLogic.zipFiles(tmpFolder, fileInfo.outputFilename).then((zipFilepath)=>{
+                GCSLogic.zipFiles(tmpFolder, fileInfo.outputFilename, targetProject).then((zipFilepath)=>{
 
                     //Delete folder after zip
                     fs.rmSync(tmpFolder, { recursive: true, force: true });
@@ -161,7 +159,7 @@ class GCSLogic  {
     }
 
     //Public Function: To zip folder and download the zip file
-    static zipGcsFolder(gcsPath, targetFilename )
+    static zipGcsFolder(gcsPath, targetFilename, targetProject )
     {
         let promise = new Promise((resolve, reject)=>{
             
@@ -169,16 +167,18 @@ class GCSLogic  {
             let tmpFolder = "/tmp/zip_" + Utils.randomString(10);
             fs.mkdirSync(tmpFolder)
 
+            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+
             //Download files to local folder
-            GCSLogic.downloadFiles(gcsPath, tmpFolder).then((downloadedFiles)=>{
+            GCSLogic.downloadFiles(gcsPath, tmpFolder, targetProject).then((downloadedFiles)=>{
 
                 //Zip  the local folder
-                GCSLogic.zipFiles(tmpFolder, fileInfo.outputFilename).then((zipFilepath)=>{
+                GCSLogic.zipFiles(tmpFolder, fileInfo.outputFilename, targetProject).then((zipFilepath)=>{
 
                     //Delete folder after zip
                     fs.rmSync(tmpFolder, { recursive: true, force: true });
 
-                    GCS.upload(fileInfo.bucket, zipFilepath, fileInfo.outputFilePath ).then((response)=>{
+                    GCS.upload(zipFilepath, fileInfo.outputFilePath, targetProjectInfo ).then((response)=>{
                         resolve(fileInfo.outputFilePath)
                     }).catch((e)=>{
                         reject({code: 'app.702', source:"GCSLogic.uploadFile", message: "Upload failed", error: e});
@@ -196,7 +196,7 @@ class GCSLogic  {
     }
 
     //Public function: createNewFile, to create new file by content.
-    static createNewFile(gcsPath, content)
+    static createNewFile(gcsPath, content, targetProject)
     {
         let promise  = new Promise((resolve, reject)=>{
             content = base64decode(content)
@@ -204,12 +204,9 @@ class GCSLogic  {
             let tmpFile = "/tmp/" + Utils.randomString(10) + "." + ext;
             fs.writeFileSync(tmpFile, content)
 
-            let bucket = gcsPath.split("/")
-            bucket = bucket[1]
+            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
 
-            gcsPath = gcsPath.replace("/" + bucket + "/", "")
-
-            GCS.upload(bucket, tmpFile, gcsPath).then((response)=>{
+            GCS.upload(tmpFile, gcsPath, targetProjectInfo).then((response)=>{
                 fs.unlinkSync(tmpFile)
                 resolve(gcsPath)
             }).catch((e)=>{
@@ -221,11 +218,12 @@ class GCSLogic  {
     }
 
     //Public function: copy, to copy file.
-    static copy(sourcePath, destPath)
+    static copy(sourcePath, destPath, targetProject)
     {
         let promise  = new Promise((resolve, reject)=>{
 
-            GCS.copy(sourcePath, destPath).then((response)=>{
+            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            GCS.copy(sourcePath, destPath, targetProjectInfo).then((response)=>{
                 resolve(true)
             }).catch((e)=>{
                 resolve({ code: '704', source:"GCSLogic.copy", error:e, message: "copy file failed" })
@@ -236,11 +234,12 @@ class GCSLogic  {
     }
 
     //Public function: rename, to rename file.
-    static rename(sourcePath, destPath)
+    static rename(sourcePath, destPath, targetProject)
     {
         let promise  = new Promise((resolve, reject)=>{
 
-            GCS.rename(sourcePath, destPath).then((response)=>{
+            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            GCS.rename(sourcePath, destPath, targetProjectInfo).then((response)=>{
                 resolve(true)
             }).catch((e)=>{
                 resolve({ code: '704', source:"GCSLogic.rename", error:e, message: "rename file failed" })
@@ -251,11 +250,12 @@ class GCSLogic  {
     }
 
     //Public function: rename, to rename file.
-    static delete(gcsPath)
+    static delete(gcsPath, targetProject)
     {
         let promise  = new Promise((resolve, reject)=>{
 
-            GCS.delete(gcsPath).then((response)=>{
+            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            GCS.delete(gcsPath, targetProjectInfo).then((response)=>{
                 resolve(true)
             }).catch((e)=>{
                 resolve({ code: '705', source:"GCSLogic.delete", error:e, message: "delete file failed" })
@@ -265,10 +265,12 @@ class GCSLogic  {
         return promise;
     }
 
-    static listFiles(gcsPath)
+    static listFiles(gcsPath, targetProject)
     {
         let promise = new Promise((resolve, reject)=>{
-            GCS.listFiles(gcsPath).then((files)=>{
+
+            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            GCS.listFiles(gcsPath, targetProjectInfo).then((files)=>{
                 resolve(files)
             }).catch(e=> reject(e))
         });
@@ -276,24 +278,36 @@ class GCSLogic  {
         return promise;
     }
 
-    static downloadFiles(gcsPath, downloadPath)
+    static downloadFiles(gcsPath, downloadPath, targetProject)
     {
         let promise = new Promise((resolve, reject)=>{
 
-            let bucket = gcsPath.split("/")
-            bucket = bucket[1]
-            GCS.listFiles(gcsPath).then((files)=>{
+            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+        
 
-                //console.log(files)
+            if(downloadPath.substr(downloadPath.length - 1, 1) == "/")
+                downloadPath = downloadPath.substr(0, downloadPath.length - 1)
+
+            console.log("downloadPath")
+            console.log(downloadPath)
+
+            console.log("gcsPath");
+            console.log(gcsPath)
+
+            GCS.listFiles(gcsPath, targetProjectInfo).then((files)=>{
+
+                console.log(files)
 
                 GCSLogic.totalFiles = files.length;
                 GCSLogic.counter = 0;
                 let downloadedFiles = []
+
     
                 files.map((file)=>{
                     let fname = path.basename(file.name)
                     let downloadedFilePath = downloadPath + "/" + fname;
-                    GCS.downloadFile(bucket, file.name, downloadedFilePath ).then((outfile)=>{
+
+                    GCS.downloadFile(file.name, downloadedFilePath, targetProjectInfo ).then((outfile)=>{
                         GCSLogic.counter++;
                         downloadedFiles.push(downloadedFilePath)
 
@@ -419,6 +433,18 @@ class GCSLogic  {
         return promise;
     }
 
+    static getProjectInfo(projectId)
+    {
+        let targetProjectInfo = null;
+        if(projectId != null)
+        {
+            targetProjectInfo = {};
+            targetProjectInfo.projectId = projectId;
+            const decodedString = Buffer.from(process.env.GCS_PROJECT_CREDENTIAL, 'base64').toString('utf-8');
+            targetProjectInfo.credential = JSON.parse(decodedString);
+        }
+        return targetProjectInfo;
+    }
 
 }
 

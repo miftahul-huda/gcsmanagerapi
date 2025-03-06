@@ -1,5 +1,6 @@
 var formidable = require('express-formidable')
 var express = require('express');
+var Utils = require("../modules/library/utils")
 
 
 class GCSRouter {
@@ -47,6 +48,12 @@ class GCSRouter {
             //Get path parameter
             let path = req.query.path;
             let targetFilename = req.query.target;
+            let targetProject = req.query.project;
+
+            if(targetFilename == null || targetFilename.length == 0)
+            {
+                targetFilename = Utils.randomString(10) + ".zip";
+            }
 
             //If path parameter is not provided, return false
             if(path == null || path.length == 0)
@@ -56,11 +63,17 @@ class GCSRouter {
             else 
             {
 
+                if(path.substr(path.length - 1, 1) != '/')
+                {
+                    path = path + '/'
+                }
+
                 console.log("/download")
                 //Else upload file to GCS
-                logic.downloadFile(path, targetFilename).then((payload)=>{
-                    res.download({ success: true, payload: payload })
+                logic.downloadFile(path, targetFilename, targetProject).then((payload)=>{
+                    res.download(payload)
                 }).catch((err)=>{
+                    console.log(err)
                     res.send({ success: false, error: err })
                 })
             }
@@ -72,6 +85,13 @@ class GCSRouter {
             //Get path parameter
             let path = req.query.path;
             let targetFilename = req.query.target;
+            let targetProject = req.query.project;
+
+            if(targetFilename == null || targetFilename.length == 0)
+            {
+                targetFilename = Utils.randomString(10) + ".zip";
+            }
+
 
             //If path parameter is not provided, return false
             if(path == null || path.length == 0)
@@ -81,12 +101,19 @@ class GCSRouter {
             else 
             {
 
+                if(path.substr(path.length - 1, 1) != '/')
+                {
+                    path = path + '/'
+                }
+
                 //Else upload file to GCS
-                logic.zipAndDownload(path, targetFilename).then((payload)=>{
+                logic.zipAndDownload(path, targetFilename, targetProject).then((payload)=>{
                     console.log('response')
                     console.log(payload)
                     res.download(payload)
                 }).catch((err)=>{
+                    console.log("errrror")
+                    console.log(err)
                     res.send({ success: false, error: err })
                 })
             }
@@ -97,6 +124,13 @@ class GCSRouter {
             //Get path parameter
             let path = req.query.path;
             let targetFilename = req.query.target;
+            let targetProject = req.query.project;
+
+            if(targetFilename == null || targetFilename.length == 0)
+            {
+                targetFilename = Utils.randomString(10) + ".zip";
+            }
+
 
             //If path parameter is not provided, return false
             if(path == null || path.length == 0)
@@ -110,8 +144,14 @@ class GCSRouter {
             else 
             {
 
+
+                if(path.substr(path.length - 1, 1) != '/')
+                {
+                    path = path + '/'
+                }
+
                 //Else upload file to GCS
-                logic.zipGcsFolder(path, targetFilename).then((payload)=>{
+                logic.zipGcsFolder(path, targetFilename, targetProject).then((payload)=>{
                     console.log('response')
                     console.log(payload)
                     res.send({ success:true, payload: payload})

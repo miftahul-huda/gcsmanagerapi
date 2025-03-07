@@ -1,6 +1,8 @@
 var formidable = require('express-formidable')
 var express = require('express');
 var Utils = require("../modules/library/utils")
+const nodepath = require('path');
+const { fn } = require('sequelize');
 
 
 class GCSRouter {
@@ -50,10 +52,6 @@ class GCSRouter {
             let targetFilename = req.query.target;
             let targetProject = req.query.project;
 
-            if(targetFilename == null || targetFilename.length == 0)
-            {
-                targetFilename = Utils.randomString(10) + ".zip";
-            }
 
             //If path parameter is not provided, return false
             if(path == null || path.length == 0)
@@ -62,10 +60,25 @@ class GCSRouter {
             }
             else 
             {
-
-                if(path.substr(path.length - 1, 1) != '/')
+                if(path.substr(path.length - 1, 1) == '/')
                 {
-                    path = path + '/'
+                    path = path.substr(0, path.length - 1);
+                }
+
+
+                if(targetFilename == null || targetFilename.length == 0)
+                {
+                    let fname = path.split('/');
+                    if(fname.length > 0)
+                    {
+                        fname = fname[fname.length - 1];
+                        targetFilename = fname;
+                    }
+                    else
+                    {
+                        let ext = nodepath.extname(path);
+                        targetFilename = Utils.randomString(10) + "." + ext;
+                    }
                 }
 
                 console.log("/download")

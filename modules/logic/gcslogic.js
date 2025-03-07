@@ -6,6 +6,7 @@ const fs = require("fs")
 const Utils = require("../library/utils")
 const ZIP = require("../library/zip");
 const { base64encode, base64decode } = require('nodejs-base64');
+const { GoogleAuth } = require('google-auth-library');
 
 
 
@@ -28,7 +29,7 @@ class GCSLogic  {
                 let filenameInfo = GCSLogic.getFilenames(req, key, targetPath, targetFilename)
 
                 //Get configuration from database
-                GCSLogic.getConfiguration().then((config)=>{
+                GCSLogic.getConfiguration().then(async (config)=>{
 
                     //Check if extension is allowed
                     let allowedExtensions = config.ALLOWED_EXTENSIONS;
@@ -51,7 +52,7 @@ class GCSLogic  {
                     if(allowedExtensions.includes(filenameInfo.ext))
                     {
 
-                        let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+                        let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
 
                         console.log("targetProjectInfo")
                         console.log(targetProjectInfo)
@@ -84,10 +85,10 @@ class GCSLogic  {
     }
 
     //Public Function : downloadFile
-    static downloadFile(downloadPath, targetFilename, targetProject )
+    static  downloadFile(downloadPath, targetFilename, targetProject )
     {
         console.log("downloadFile")
-        let promise = new Promise((resolve, reject)=>{
+        let promise = new Promise(async(resolve, reject)=>{
             
             //Get output filename in  temporary file
             let outputFilename = targetFilename
@@ -108,7 +109,7 @@ class GCSLogic  {
             console.log(downloadPath)
 
             
-            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
             GCS.downloadFile(downloadPath, outputFilename, targetProjectInfo ).then((outfile)=>{
                 resolve(outfile)
             }).catch((e)=>{
@@ -122,7 +123,7 @@ class GCSLogic  {
     //Public Function: To zip folder and download the zip file
     static zipAndDownload(gcsPath, targetFilename, targetProject )
     {
-        let promise = new Promise((resolve, reject)=>{
+        let promise = new Promise(async (resolve, reject)=>{
             
             
             let fileInfo = GCSLogic.getFileInfos(gcsPath, targetFilename)
@@ -132,7 +133,7 @@ class GCSLogic  {
             let tmpFolder = "/tmp/zip_" + Utils.randomString(10);
             fs.mkdirSync(tmpFolder)
 
-            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
 
             //Download files to local folder
             
@@ -161,13 +162,13 @@ class GCSLogic  {
     //Public Function: To zip folder and download the zip file
     static zipGcsFolder(gcsPath, targetFilename, targetProject )
     {
-        let promise = new Promise((resolve, reject)=>{
+        let promise = new Promise(async (resolve, reject)=>{
             
             let fileInfo = GCSLogic.getFileInfos(gcsPath, targetFilename)
             let tmpFolder = "/tmp/zip_" + Utils.randomString(10);
             fs.mkdirSync(tmpFolder)
 
-            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
 
             //Download files to local folder
             GCSLogic.downloadFiles(gcsPath, tmpFolder, targetProject).then((downloadedFiles)=>{
@@ -198,13 +199,13 @@ class GCSLogic  {
     //Public function: createNewFile, to create new file by content.
     static createNewFile(gcsPath, content, targetProject)
     {
-        let promise  = new Promise((resolve, reject)=>{
+        let promise  = new Promise(async (resolve, reject)=>{
             content = base64decode(content)
             let ext = path.extname(gcsPath);
             let tmpFile = "/tmp/" + Utils.randomString(10) + "." + ext;
             fs.writeFileSync(tmpFile, content)
 
-            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
 
             GCS.upload(tmpFile, gcsPath, targetProjectInfo).then((response)=>{
                 fs.unlinkSync(tmpFile)
@@ -220,9 +221,9 @@ class GCSLogic  {
     //Public function: copy, to copy file.
     static copy(sourcePath, destPath, targetProject)
     {
-        let promise  = new Promise((resolve, reject)=>{
+        let promise  = new Promise(async(resolve, reject)=>{
 
-            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
             GCS.copy(sourcePath, destPath, targetProjectInfo).then((response)=>{
                 resolve(true)
             }).catch((e)=>{
@@ -236,9 +237,9 @@ class GCSLogic  {
     //Public function: rename, to rename file.
     static rename(sourcePath, destPath, targetProject)
     {
-        let promise  = new Promise((resolve, reject)=>{
+        let promise  = new Promise(async (resolve, reject)=>{
 
-            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
             GCS.rename(sourcePath, destPath, targetProjectInfo).then((response)=>{
                 resolve(true)
             }).catch((e)=>{
@@ -252,9 +253,9 @@ class GCSLogic  {
     //Public function: rename, to rename file.
     static delete(gcsPath, targetProject)
     {
-        let promise  = new Promise((resolve, reject)=>{
+        let promise  = new Promise(async (resolve, reject)=>{
 
-            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
             GCS.delete(gcsPath, targetProjectInfo).then((response)=>{
                 resolve(true)
             }).catch((e)=>{
@@ -267,9 +268,9 @@ class GCSLogic  {
 
     static listFiles(gcsPath, targetProject)
     {
-        let promise = new Promise((resolve, reject)=>{
+        let promise = new Promise(async (resolve, reject)=>{
 
-            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
             GCS.listFiles(gcsPath, targetProjectInfo).then((files)=>{
                 resolve(files)
             }).catch(e=> reject(e))
@@ -280,9 +281,9 @@ class GCSLogic  {
 
     static downloadFiles(gcsPath, downloadPath, targetProject)
     {
-        let promise = new Promise((resolve, reject)=>{
+        let promise = new Promise(async (resolve, reject)=>{
 
-            let targetProjectInfo = GCSLogic.getProjectInfo(targetProject);
+            let targetProjectInfo = await GCSLogic.getProjectInfo(targetProject);
         
 
             if(downloadPath.substr(downloadPath.length - 1, 1) == "/")
@@ -433,17 +434,33 @@ class GCSLogic  {
         return promise;
     }
 
-    static getProjectInfo(projectId)
+    static async getProjectInfo(projectId)
     {
+        let thisProjectID = await GCSLogic.getCurrentGcpProject();
         let targetProjectInfo = null;
+
         if(projectId != null)
         {
-            targetProjectInfo = {};
-            targetProjectInfo.projectId = projectId;
-            const decodedString = Buffer.from(process.env.GCS_PROJECT_CREDENTIAL, 'base64').toString('utf-8');
-            targetProjectInfo.credential = JSON.parse(decodedString);
+            if(thisProjectID != null && projectId.toLowerCase() != thisProjectID.toLowerCase())
+            {
+                targetProjectInfo = {};
+                targetProjectInfo.projectId = projectId;
+                const decodedString = Buffer.from(process.env.GCS_PROJECT_CREDENTIAL, 'base64').toString('utf-8');
+                targetProjectInfo.credential = JSON.parse(decodedString);
+            }
         }
         return targetProjectInfo;
+    }
+
+    static async getCurrentGcpProject() {
+        const auth = new GoogleAuth();
+        try {
+          const projectId = await auth.getProjectId();
+          return projectId;
+        } catch (error) {
+          console.error('Error getting GCP project ID:', error);
+          return null;
+        }
     }
 
 }
